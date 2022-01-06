@@ -1,0 +1,14 @@
+{
+  "name": "advent-of-code-2021",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Parker Bossier",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "tsc --watch"
+  },
+  "dependencies": {
+    "typescript": "^4.5.4"
+  }
+}
