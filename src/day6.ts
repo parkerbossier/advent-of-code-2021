@@ -47,5 +47,6 @@ function main2(data: number[]) {
 }
 
 const data = day6data.split(',').map(n => parseInt(n, 10));
+
 main1(data);
 main2(data);

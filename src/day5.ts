@@ -78,8 +78,8 @@ function main2(segments: number[][]) {
 }
 
 const data = day5data.split('\n').map(r => {
-	const matches = r.match(/(\d+),(\d+) -> (\d+),(\d+)/);
-	const coords = matches!.slice(1).map(n => parseInt(n, 10));
+	const matches = r.match(/(\d+),(\d+) -> (\d+),(\d+)/)!;
+	const coords = matches.slice(1).map(n => parseInt(n, 10));
 	return coords;
 });
 
