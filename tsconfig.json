@@ -4,6 +4,7 @@
 		"moduleResolution": "node",
 		"outDir": "./bld",
 		"rootDir": "./",
+		"sourceMap": true,
 		"strict": true,
 		"target": "ESNext"
 	}
