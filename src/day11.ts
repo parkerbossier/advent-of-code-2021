@@ -126,20 +126,9 @@ function main2(energies: number[][]) {
 					energies[r][c] = 0;
 			}
 		}
-
-		// console.log('after step', step + 1);
-		// printGrid(energies);
-		// console.log();
-		// printGrid(flashes, n => n ? '*' : '0');
-		// console.log()
 	}
 
 	console.log(stepWithAllFlashes);
-}
-
-function printGrid<T>(grid: T[][], transformer?: (n: T) => string) {
-	const string = grid.map(r => r.map(n => transformer?.(n) ?? n).join('')).join('\n');
-	console.log(string);
 }
 
 const data = day11data.split('\n').map(r => r.split('').map(n => parseInt(n, 10)));
