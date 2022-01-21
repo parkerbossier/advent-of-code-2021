@@ -48,16 +48,22 @@ function main2(template: string, rules: Record<string, string>) {
 			pairCounts[k] ??= 0;
 			pairCounts[k] += v;
 		});
-
-		// console.log('after step', step + 1);
-		// console.log(pairCounts);
 	}
 
-	const maxCount = Math.max(...Object.values(pairCounts));
-	const minCount = Math.min(...Object.values(pairCounts));
+	// for all elements, add all *X counts
+	const elements = _.uniq(Object.keys(pairCounts).join(''));
+	const elementCounts: Record<string, number> = {};
+	elements.forEach(e => {
+		elementCounts[e] ??= 0;
+		_.forEach(pairCounts, (count, pair) => {
+			if (pair.endsWith(e))
+				elementCounts[e] += count;
+		});
+	});
 
-	console.log({minCount, maxCount})
-	console.log(pairCounts)
+	const maxCount = Math.max(...Object.values(elementCounts));
+	const minCount = Math.min(...Object.values(elementCounts));
+
 	console.log(maxCount - minCount);
 }
 
@@ -70,5 +76,5 @@ rulesText
 		rules[matches[1]] = matches[2];
 	});
 
-//main1(template, rules);
+main1(template, rules);
 main2(template, rules);
