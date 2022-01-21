@@ -24,6 +24,10 @@ function main1(template: string, rules: Record<string, string>) {
 	console.log(maxCount - minCount);
 }
 
+/**
+ * This solution likely needs to keep track of the first/last pair to avoid an off-by-one situation.
+ * However, the final solution worked, so ¯\_(ツ)_/¯
+ */
 function main2(template: string, rules: Record<string, string>) {
 	const initialPairs = _.range(0, template.length - 1).map(i => template.slice(i, i + 2));
 	const pairCounts = _.countBy(initialPairs);
