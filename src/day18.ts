@@ -195,13 +195,35 @@ function main1(input: string[]) {
 		sum = reduce(added);
 	}
 
-	console.log('sum', sum)
 	const mag = magnitude(JSON.parse(sum));
-
 	console.log(mag);
+}
+
+function main2(input: string[]) {
+	const permutations: [number, number][] = [];
+	for (let i = 0; i < input.length; i++) {
+		for (let j = 0; j < input.length; j++) {
+			if (i === j)
+				continue;
+
+			permutations.push([i, j]);
+		}
+	}
+
+	const magnitudes = permutations.map(p => {
+		const sum = `[${input[p[0]]},${input[p[1]]}]`;
+		const reduced = reduce(sum);
+		const mag = magnitude(JSON.parse(reduced));
+		return mag;
+	});
+
+	const maxMag = Math.max(...magnitudes);
+	console.log(maxMag);
 }
 
 // tests();
 
 const data = day18data.split('\n');
 main1(data);
+main2(data);
+
