@@ -1,4 +1,4 @@
-import _ = require('lodash');
+import _ from 'lodash';
 import { day19data } from './day19data';
 
 function main(scanners: Scanner[]) {

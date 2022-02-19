@@ -1,4 +1,4 @@
-import _ = require('lodash');
+import _ from 'lodash';
 import { day9data } from './day9data';
 
 function main1(data: number[][]) {

@@ -1,5 +1,5 @@
 import { isNumber } from 'lodash';
-import _ = require('lodash');
+import _ from 'lodash';
 import { day18data } from './day18data';
 
 function tryExplode(input: string) {

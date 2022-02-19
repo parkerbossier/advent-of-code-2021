@@ -1,5 +1,5 @@
 import { isNumber } from 'lodash';
-import _ = require('lodash');
+import _ from 'lodash';
 import { day16data } from './day16data';
 
 interface Packet {

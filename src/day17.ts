@@ -1,4 +1,4 @@
-import _ = require('lodash');
+import _ from 'lodash';
 
 type Point = [number, number];
 

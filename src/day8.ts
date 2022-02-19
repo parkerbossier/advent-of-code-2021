@@ -1,4 +1,4 @@
-import _ = require('lodash');
+import _ from 'lodash';
 import { day8data } from './day8data';
 
 type Data = typeof data;
