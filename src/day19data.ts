@@ -1,3 +1,13 @@
+/*
+overlapping in 0
+-618,-824,-621 (index 9)
+-537,-823,-458 (index 4)
+
+i4 - i9
+81,1,163
+
+*/
+
 export const day19data = `--- scanner 0 ---
 404,-588,-901
 528,-643,409
