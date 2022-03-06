@@ -102,22 +102,26 @@ function pixelToKey(p: number[]) {
 
 type Image2 = string[][];
 
-function main2() {
+async function main2() {
 	const [algo, imageString] = day20data.split('\n\n');
 	const image: Image2 = imageString.split('\n').map(r => r.split(''));
 
 	let workingImage = image;
-	// console.log(workingImage.map(r => r.join('')).join('\n'));
-	// console.log();
+	for (let i = 0; i < 50; i++) {
+		if (algo[0] === '.')
+			workingImage = enhance2(algo, workingImage, '.');
+		else
+			workingImage = enhance2(algo, workingImage, i % 2 === 0 ? '.' : '#');
 
-	workingImage = enhance2(algo, image, '.');
-	// console.log(workingImage.map(r => r.join('')).join('\n'));
-	// console.log();
+		// console.log(workingImage.map(r => r.join('')).join('\n'));
+		// console.log();
 
-	workingImage = enhance2(algo, workingImage, algo[0] === '.' ? '.' : '#');
-	// console.log(workingImage.map(r => r.join('')).join('\n'));
-	// console.log();
+		// await new Promise(res => {
+		// 	setTimeout(res, 500);
+		// });
+	}
 
+	// console.log(workingImage.map(r => r.join('')).join('\n'))
 	console.log(workingImage.flatMap(r => r).filter(c => c === '#').length);
 }
 
@@ -153,5 +157,5 @@ function enhance2(algo: string, image: Image2, background: string) {
 	return newImage;
 }
 
-main1();
-main2();
+// main1();
+main2().finally(() => process.exit());
