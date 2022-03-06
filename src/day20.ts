@@ -4,13 +4,24 @@ import { day20data } from "./day20data";
 /** An array of '1' or '#' pixels ('row,column') */
 type Image = Set<string>;
 
-function main1(algo: string, image: Image) {
+function main1() {
+	const [algo, imageString] = day20data.split('\n\n');
+	const image: Image = new Set();
+	const splitImageString = imageString.split('\n');
+	splitImageString.forEach((row, r) => {
+		const rowArray = row.split('');
+		rowArray.forEach((col, c) => {
+			if (col === '#')
+				image.add(pixelToKey([r, c]));
+		});
+	});
+
 	let workingImage = image;
 
 	for (let i = 0; i < 2; i++) {
 		workingImage = enhance(algo, workingImage);
-		printImage(workingImage);
-		console.log();
+		// printImage(workingImage);
+		// console.log();
 	}
 
 	// console.log(workingImage);
@@ -89,20 +100,58 @@ function pixelToKey(p: number[]) {
 	return p.join(',');
 }
 
-const data = (() => {
+type Image2 = string[][];
+
+function main2() {
 	const [algo, imageString] = day20data.split('\n\n');
-	const image: Image = new Set();
-	const splitImageString = imageString.split('\n');
-	splitImageString.forEach((row, r) => {
-		const rowArray = row.split('');
-		rowArray.forEach((col, c) => {
-			if (col === '#')
-				image.add(pixelToKey([r, c]));
-		});
-	});
-	const imageDims = [splitImageString.length, splitImageString[0].length];
+	const image: Image2 = imageString.split('\n').map(r => r.split(''));
 
-	return { algo, image, imageDims };
-})();
+	let workingImage = image;
+	// console.log(workingImage.map(r => r.join('')).join('\n'));
+	// console.log();
 
-main1(data.algo, data.image);
+	workingImage = enhance2(algo, image, '.');
+	// console.log(workingImage.map(r => r.join('')).join('\n'));
+	// console.log();
+
+	workingImage = enhance2(algo, workingImage, algo[0] === '.' ? '.' : '#');
+	// console.log(workingImage.map(r => r.join('')).join('\n'));
+	// console.log();
+
+	console.log(workingImage.flatMap(r => r).filter(c => c === '#').length);
+}
+
+function enhance2(algo: string, image: Image2, background: string) {
+	const kernel = [
+		[-1, -1],
+		[-1, 0],
+		[-1, 1],
+		[0, -1],
+		[0, 0],
+		[0, 1],
+		[1, -1],
+		[1, 0],
+		[1, 1]
+	];
+
+	const newImage = _.range(0, image.length + 2)
+		.map(_r => _.range(0, image[0].length + 2)
+			.map(_c => '.')
+		);
+
+	for (let r = -1; r < image.length + 1; r++) {
+		for (let c = -1; c < image[0].length + 1; c++) {
+			const newPixelAlgoKey = kernel.map(k => {
+				const sourcePixel = image[r + k[0]]?.[c + k[1]] ?? background;
+				return sourcePixel;
+			}).join('').replace(/\./g, '0').replace(/#/g, '1');
+			const newPixelValue = algo[parseInt(newPixelAlgoKey, 2)];
+			newImage[r + 1][c + 1] = newPixelValue;
+		}
+	}
+
+	return newImage;
+}
+
+main1();
+main2();
