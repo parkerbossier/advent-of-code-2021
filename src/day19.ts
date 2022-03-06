@@ -4,9 +4,7 @@ import { day19data } from './day19data';
 
 /** b1 - b0 */
 function subtractBeacons(b1: number[], b0: number[]) {
-	{
-		return b0.map((b0n, i) => b1[i] - b0n);
-	}
+	return b0.map((b0n, i) => b1[i] - b0n);
 }
 
 function main(scanners: Scanner[]) {
