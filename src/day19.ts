@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import * as math from 'mathjs';
 import { day19data } from './day19data';
 
 function negateDiffString(diff: string) {
@@ -45,23 +46,32 @@ rotate around z
 */
 
 /** b1 - b0 */
-function subtractBeacons(b1: number[], b0: number[]) {{
-	return b0.map((b0n, i) => b1[i] - b0n);
-}}
+function subtractBeacons(b1: number[], b0: number[]) {
+	{
+		return b0.map((b0n, i) => b1[i] - b0n);
+	}
+}
 
 function main(scanners: Scanner[]) {
-	const seps0 = scanners[0].getBeaconSeparations().beaconSeparations2;
-	let seps1 = scanners[1].getBeaconSeparations().beaconSeparations2;
+	const s0 = scanners[0];
+	const s1 = scanners[1];
+
+	// console.log(s1.beacons[0])
+	// s1.translate([-36, 6, 33]);
+	// console.log(s1.beacons[1])
+
+	const seps0 = s0.getBeaconSeparations().beaconSeparations2;
+	let seps1 = s1.getBeaconSeparations().beaconSeparations2;
 
 	breakout:
 	for (let facingAxis = 0; facingAxis < 3; facingAxis++) {
-		for (let facingDirection = 1; facingDirection >= -1; facingDirection -= 2) {
+		for (let facingAxisDirection = 0; facingAxisDirection < 2; facingAxisDirection++) {
 			for (let rotation = 0; rotation < 4; rotation++) {
-				console.log({ facingAxis, facingDirection, rotation });
+				console.log({ facingAxis, facingAxisDirection, rotation });
 
-				scanners[1].rotate2(facingAxis, facingDirection, rotation);
+				s1.rotate(facingAxis, facingAxisDirection, rotation);
 
-				seps1 = scanners[1].getBeaconSeparations().beaconSeparations2;
+				seps1 = s1.getBeaconSeparations().beaconSeparations2;
 
 				const matchingPairs: number[][][] = [];
 				for (const s0 of seps0) {
@@ -73,43 +83,54 @@ function main(scanners: Scanner[]) {
 					}
 				}
 
-				console.log(matchingPairs);
+				console.log('matching pairs')
+				//console.log(matchingPairs);
 				console.log(matchingPairs.length);
 
-				if (matchingPairs.length >= 12) {
-					const offsets = matchingPairs.flatMap(p => {
-						const s0BeaconA = scanners[0].beacons[p[0][0]];
-						const s0BeaconB = scanners[0].beacons[p[0][1]];
-						const s1BeaconA = scanners[0].beacons[p[1][0]];
-						const s1BeaconB = scanners[0].beacons[p[1][1]];
+				if (matchingPairs.length < 12 * 6)
+					continue;
 
-						return [
-							subtractBeacons(s1BeaconA, s0BeaconA),
-							subtractBeacons(s1BeaconB, s0BeaconB)
-						];
-					});
+				const offsets = matchingPairs.flatMap(p => {
+					const s0BeaconA = s0.beacons[p[0][0]];
+					const s0BeaconB = s0.beacons[p[0][1]];
+					const s1BeaconA = s1.beacons[p[1][0]];
+					const s1BeaconB = s1.beacons[p[1][1]];
 
-					console.log(_.uniqBy(offsets, a => JSON.stringify(a)));
+					return [
+						subtractBeacons(s0BeaconA, s1BeaconA),
+						subtractBeacons(s0BeaconB, s1BeaconB)
+					];
+				});
 
-					break breakout;
-				}
+				const offsetCounts: [string, number][] = _.map(
+					_.countBy(offsets, a => JSON.stringify(a)),
+					(count, offset) => [offset, count]
+				);
+				const bestOffset = _.sortBy(offsetCounts, oc => oc[1])[0];
+				if (bestOffset[1] < 12)
+					continue;
+
+				const offset: number[] = JSON.parse(bestOffset[0]);
+				console.log('offset', offset)
+
+				s1.translate(offset);
+
+				console.log('s0')
+				console.log(s0.beacons)
+				console.log('s1')
+				console.log(s1.beacons)
+
+				console.log('mutual')
+				console.log(_.intersectionWith(s0.beacons, s1.beacons, _.isEqual))
+
+				break breakout;
 			}
 		}
 	}
-
-	// console.log('s0 beacons')
-	// console.log(scanners[0].beacons)
-
-	// console.log('s1 beacons')
-	// console.log(scanners[1].beacons)
-
-	// console.log('in s0 and s1')
-	// console.log(_.intersectionWith(scanners[0].beacons, scanners[1].beacons, _.isEqual));
 }
 
 class Scanner {
 	public beacons: number[][];
-	public locationRelativeToS0?: number[];
 	public name: string;
 	private originalBeacons: number[][];
 
@@ -128,9 +149,9 @@ class Scanner {
 		const beaconSeparations2 = new Map<string, number[]>();
 
 		for (let i = 0; i < this.beacons.length; i++) {
-			// for (let j = 0; j < this.beacons.length; j++) {
-			// 	if (i === j) continue;
-			for (let j = i + 1; j < this.beacons.length; j++) {
+			for (let j = 0; j < this.beacons.length; j++) {
+				if (i === j) continue;
+				// for (let j = i + 1; j < this.beacons.length; j++) {
 				const iBeacon = this.beacons[i];
 				const jBeacon = this.beacons[j];
 				const diff = iBeacon.map((n, bi) => n - jBeacon[bi]);
@@ -141,125 +162,38 @@ class Scanner {
 		return { beaconSeparations, beaconSeparations2 };
 	}
 
-	/**
-	 * 0-index values are noops
-	 * @param p permute (0 - 3)
-	 * @param n negate (0 - 7)
-	 */
-	rotate(p: number, n: number) {
-		const newBecons = this.originalBeacons.map(b => {
-			const permuted = permute(b, p);
-			const negated = negate(permuted, n);
-			return negated;
-		});
-		this.beacons = newBecons;
-	}
+	rotate(facing: number, facingDirection: number, rotation: number) {
+		const facingVector = [
+			[1, 0, 0],
+			[0, 1, 0],
+			[0, 0, 1]
+		][facing];
 
-	rotate2(facingAxis: number, facingDirection: number, rotation: number) {
-		const newBecons = this.originalBeacons.map(b => {
-			/*
-				https://media.istockphoto.com/vectors/3d-coordinate-axis-vector-vector-id818268912?k=20&m=818268912&s=612x612&w=0&h=hVl9cteIRL0UHCv7BwBbWTAQcyVfajDkwosbdG5dSkE=
-				
-				facingAxis -> rotationAxis
-				0 -> n/a
-				1 -> 2
-				2 -> 1 (-)
-	
-			
-			*/
-
-			const facingPositive = facingDirection > 0;
-			const facing = (() => {
-				switch (facingAxis) {
+		const newBeacons = this.originalBeacons.map(b => {
+			const rotatedFacing = (() => {
+				switch (facing) {
 					case 0:
-						return rotateBeacon(b, 2, facingPositive ? 0 : 2)
+						return math.rotate(b, facingDirection * Math.PI, [0, 0, 1]);
 					case 1:
-						return rotateBeacon(b, 2, facingPositive ? 1 : 3);
+						return math.rotate(b, Math.PI / 2 + facingDirection * Math.PI, [0, 0, 1]);
 					default:
-						return rotateBeacon(b, 1, facingPositive ? 3 : 1);
+						return math.rotate(b, -Math.PI / 2 + facingDirection * Math.PI, [0, 1, 0]);
 				}
 			})();
-			const rotated = (() => {
-				switch (rotation) {
-					case 0:
-						return rotateBeacon(facing, 0, rotation)
-					case 1:
-						return rotateBeacon(facing, 0, rotation);
-					default:
-						return rotateBeacon(facing, 0, rotation);
-				}
-			})();
+			const rotatedAround = math.rotate(rotatedFacing, rotation * Math.PI / 2, facingVector);
 
-			return rotated;
+			return rotatedAround.map(Math.round);
 		});
-		this.beacons = newBecons;
+		this.beacons = newBeacons;
 	}
 
-	// TODO: rotate diffs instead of beacons and recalcuating?
-}
-
-function rotateBeacon(b: number[], axis: number, amount = 1) {
-	if (amount === 0)
-		return b;
-
-	/*
-	 * initial
-	 * x y z
-	
-	 * rotate around x
-	 * x -z y
-	
-	 * rotate around y
-	 * z y -x
-	
-	 * rotate around z
-	 * -y x z
-	 */
-
-	let nB = [...b];
-	for (let i = 0; i < amount; i++) {
-		switch (axis) {
-			case 0:
-				nB = [nB[0], -nB[2], nB[1]];
-				break;
-			case 1:
-				nB = [nB[2], nB[1], -nB[0]];
-				break;
-			case 2:
-				nB = [-nB[1], nB[0], nB[2]];
-		}
+	translate(offset: number[]) {
+		const newBeacons = this.beacons.map(b => {
+			return [b[0] + offset[0], b[1] + offset[1], b[2] + offset[2]];
+		});
+		this.originalBeacons = newBeacons;
+		this.beacons = newBeacons;
 	}
-
-	return nB;
-}
-
-function negate(beacon: number[], n: number) {
-	const negateMap = [
-		[1, 1, 1],
-		[1, 1, -1],
-		[1, -1, 1],
-		[1, -1, -1],
-		[-1, 1, 1],
-		[-1, 1, -1],
-		[-1, -1, 1],
-		[-1, -1, -1]
-	];
-	return beacon.map((a, i) => {
-		return a * negateMap[n][i];
-	});
-}
-
-function permute(beacon: number[], p: number) {
-	const permuteMap = [
-		[0, 1, 2],
-		[0, 2, 1],
-		[1, 0, 2],
-		[2, 1, 0]
-	];
-	return beacon.map((_a, i) => {
-		const permutedIndex = permuteMap[p][i];
-		return beacon[permutedIndex];
-	});
 }
 
 const data = day19data
@@ -267,3 +201,4 @@ const data = day19data
 	.map(s => new Scanner(s));
 
 main(data);
+//main2();
